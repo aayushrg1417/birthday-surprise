@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Special Surprise For You ✨</title>
+  <meta property="og:title" content="A Special Surprise For You ✨" />
+  <meta property="og:description" content="You have received a special invitation. Tap to open..." />
+
+  <!-- Google Fonts & Canvas Confetti -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0c0814;
+      --card-bg: rgba(26, 17, 39, 0.78);
+      --card-border: rgba(244, 114, 182, 0.22);
+      --accent-pink: #f472b6;
+      --accent-rose: #fb7185;
+      --accent-gold: #fcd34d;
+      --text: #fdf2f8;
+      --text-muted: #d8b4e2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Ambient Animated Glows */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.45;
+      animation: pulse 8s ease-in-out infinite alternate;
+    }
+    .glow-1 { top: -10%; left: -10%; width: 420px; height: 420px; background: radial-gradient(circle, #db2777, transparent); }
+    .glow-2 { bottom: -10%; right: -10%; width: 450px; height: 450px; background: radial-gradient(circle, #7c3aed, transparent); }
+
+    @keyframes pulse {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.15) translate(30px, -20px); }
+    }
+
+    /* Floating Heart Particles */
+    #hearts-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Top Sticky Controls */
+    .top-bar {
+      position: fixed;
+      top: 16px;
+      left: 0;
+      width: 100%;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      max-width: 600px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .progress-pill {
+      background: rgba(18, 12, 28, 0.85);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent-pink);
+      letter-spacing: 0.5px;
+    }
+
+    /* Vinyl Record Music Toggle */
+    .vinyl-btn {
+      width: 44px;
+      height: 44px;
+      background: #111;
+      border: 2px solid #333;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .vinyl-btn.spinning {
+      animation: spin 4s linear infinite;
+      border-color: var(--accent-pink);
+    }
+    .vinyl-inner {
+      width: 16px;
+      height: 16px;
+      background: var(--accent-rose);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .vinyl-inner::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Main Container & Chapters */
+    .main-wrap {
+      width: 100%;
+      max-width: 460px;
+      padding: 85px 20px 40px;
+      z-index: 10;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chapter {
+      display: none;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(244,114,182,0.12);
+      animation: cardAppear 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .chapter.active {
+      display: block;
+    }
+
+    @keyframes cardAppear {
+      from { opacity: 0; transform: translateY(24px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    h1, h2 {
+      font-family: 'Playfair Display', serif;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f43f5e, #ec4899);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(244, 63, 94, 0.4);
+      transition: all 0.25s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:active {
+      transform: scale(0.96);
+    }
+
+    /* CHAPTER 0: 3D ENVELOPE */
+    .envelope-box {
+      perspective: 1000px;
+      margin: 20px auto 30px;
+      cursor: pointer;
+      width: 220px;
+      height: 150px;
+      position: relative;
+    }
+    .envelope-base {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #881337, #be123c);
+      border-radius: 12px;
+      position: relative;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.15);
+      overflow: hidden;
+    }
+    .envelope-base::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-left: 110px solid #9f1239;
+      border-right: 110px solid #9f1239;
+      border-bottom: 80px solid #be123c;
+      border-top: 70px solid transparent;
+      width: 0;
+      height: 0;
+      bottom: 0;
+    }
+    .wax-seal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 52px;
+      height: 52px;
+      background: radial-gradient(circle, #e11d48, #9f1239);
+      border-radius: 50%;
+      border: 2px dashed #fda4af;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      z-index: 5;
+      animation: pulseSeal 2s infinite alternate;
+    }
+    @keyframes pulseSeal {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      100% { transform: translate(-50%, -50%) scale(1.08); }
+    }
+
+    /* CHAPTER 1: RUNAWAY VERIFICATION */
+    .security-arena {
+      position: relative;
+      min-height: 140px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    #btn-no {
+      position: relative;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cbd5e1;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* CHAPTER 2: LIFETIME COUNTER */
+    .ticker-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .ticker-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 16px 12px;
+      border-radius: 16px;
+    }
+    .ticker-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      display: block;
+    }
+    .ticker-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+    .date-adjuster {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .date-adjuster input {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--card-border);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    /* CHAPTER 3: TINDER POLAROID DECK */
+    .deck-container {
+      position: relative;
+      width: 270px;
+      height: 350px;
+      margin: 20px auto 35px;
+      perspective: 1000px;
+    }
+    .polaroid-card {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      padding: 14px 14px 28px;
+      border-radius: 14px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+      color: #1e1b4b;
+    }
+    .polaroid-img-wrap {
+      width: 100%;
+      height: 235px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #2a1b40;
+      position: relative;
+    }
+    .polaroid-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .polaroid-caption {
+      margin-top: 14px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    /* CHAPTER 4: QUIZ */
+    .quiz-question {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .quiz-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #f1f5f9;
+      padding: 14px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+    .quiz-btn:hover {
+      background: rgba(244, 114, 182, 0.15);
+      border-color: var(--accent-pink);
+    }
+
+    /* CHAPTER 5: INTERACTIVE CAKE */
+    .cake-stage {
+      position: relative;
+      height: 200px;
+      margin: 20px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      cursor: pointer;
+    }
+    .cake-base {
+      width: 170px;
+      height: 70px;
+      background: linear-gradient(to right, #f43f5e, #fda4af, #f43f5e);
+      border-radius: 18px 18px 10px 10px;
+      position: relative;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+    .cake-top {
+      width: 130px;
+      height: 50px;
+      background: linear-gradient(to right, #fb7185, #ffe4e6, #fb7185);
+      border-radius: 16px 16px 8px 8px;
+      margin-bottom: -10px;
+      z-index: 2;
+    }
+    .candles-row {
+      display: flex;
+      gap: 18px;
+      z-index: 3;
+      margin-bottom: -4px;
+    }
+    .candle {
+      width: 10px;
+      height: 38px;
+      background: repeating-linear-gradient(45deg, #fff, #fff 5px, #f43f5e 5px, #f43f5e 10px);
+      border-radius: 4px;
+      position: relative;
+    }
+    .candle-flame {
+      width: 14px;
+      height: 22px;
+      background: radial-gradient(ellipse at bottom, #fff 10%, #fcd34d 40%, #f97316 85%);
+      border-radius: 50% 50% 30% 30%;
+      position: absolute;
+      top: -24px;
+      left: -2px;
+      box-shadow: 0 0 14px #fbbf24;
+      animation: flicker 0.6s infinite alternate;
+      transform-origin: bottom center;
+    }
+    .candle.blown .candle-flame {
+      display: none;
+    }
+    .candle.blown::after {
+      content: '';
+      position: absolute;
+      top: -18px;
+      left: 2px;
+      width: 6px;
+      height: 16px;
+      background: rgba(200, 200, 200, 0.4);
+      filter: blur(2px);
+      border-radius: 50%;
+      animation: smoke 1.2s forwards;
+    }
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); }
+      100% { transform: scale(1.1) rotate(2deg); }
+    }
+    @keyframes smoke {
+      0% { opacity: 0.8; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(2); }
+    }
+
+    /* CHAPTER 6: SCRATCH PASSES */
+    .scratch-wrapper {
+      position: relative;
+      width: 260px;
+      height: 120px;
+      margin: 16px auto;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    .scratch-reward {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #fbcfe8, #fda4af);
+      color: #881337;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .scratch-reward span {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #9f1239;
+      margin-top: 4px;
+    }
+    canvas.scratch-canvas {
+      position: absolute;
+      inset: 0;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    /* CHAPTER 7: LOVE LETTER */
+    .letter-paper {
+      background: #fdfbf7;
+      color: #2e1065;
+      padding: 28px 20px;
+      border-radius: 16px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.45rem;
+      line-height: 1.6;
+      text-align: left;
+      box-shadow: inset 0 0 40px rgba(220,180,140,0.3), 0 10px 30px rgba(0,0,0,0.5);
+      border-left: 4px solid var(--accent-rose);
+      margin-bottom: 24px;
+    }
+    .letter-paper p {
+      color: #1e1b4b;
+      margin-bottom: 16px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.4rem;
+    }
+    .letter-sig {
+      text-align: right;
+      font-weight: 700;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <canvas id="hearts-canvas"></canvas>
+
+  <!-- Sticky Top Bar -->
+  <div class="top-bar">
+    <div class="progress-pill" id="progress-indicator">Chapter 1 of 7</div>
+    <div class="vinyl-btn" id="music-toggle" title="Play/Mute Background Chimes">
+      <div class="vinyl-inner"></div>
+    </div>
+  </div>
+
+  <div class="main-wrap">
+
+    <!-- CHAPTER 0: THE WAX-SEALED INVITATION -->
+    <div class="chapter active" id="ch-0">
+      <h2>A Surprise For You</h2>
+      <p>Someone planned a tiny adventure just to make you smile on your birthday.</p>
+      
+      <div class="envelope-box" onclick="openEnvelope()">
+        <div class="envelope-base">
+          <div class="wax-seal">💌</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="openEnvelope()">
+        <span>Break the Seal & Open</span> ✨
+      </button>
+    </div>
+
+    <!-- CHAPTER 1: THE RUNAWAY SECURITY CHECK -->
+    <div class="chapter" id="ch-1">
+      <h2>Identity Verification</h2>
+      <p>Before we proceed, strict security protocols require us to verify your identity.</p>
+      <p style="font-weight: 600; color: #fff;">Are you officially the most gorgeous girl in the whole world?</p>
+
+      <div class="security-arena" id="arena">
+        <button class="btn-primary" onclick="passVerification()">Yes, Obviously! 💅</button>
+        <button id="btn-no" onmouseover="dodgeButton()" onclick="dodgeButton()">No</button>
+      </div>
+    </div>
+
+    <!-- CHAPTER 2: THE LIFETIME TICKER -->
+    <div class="chapter" id="ch-2">
+      <h2>Every Second With You</h2>
+      <p>Here is the exact amount of time the world has been blessed with your existence:</p>
+
+      <div class="date-adjuster">
+        <span>Birthday:</span>
+        <input type="date" id="birthdate-input" value="2006-11-04" onchange="updateLifetimeCounter()" />
+      </div>
+
+      <div class="ticker-grid">
+        <div class="ticker-card">
+          <span class="ticker-num" id="t-years">0</span>
+          <span class="ticker-label">Years of Grace</span>
+        </div>
+        <div class="ticker-card">
+          <span class="ticker-num" id="t-days">0</span>
+          <span class="ticker-label">Days of Smiles</span>
+        </div>
+        <div class="ticker-card">
+          <span class="ticker-num" id="t-hours">0</span>
+          <span class="ticker-label">Hours of Magic</span>
+        </div>
+        <div class="ticker-card">
+          <span class="ticker-num" id="t-seconds">0</span>
+          <span class="ticker-label">Ticking Seconds</span>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="nextChapter()">
+        <span>Walk Down Memory Lane</span> 📸
+      </button>
+    </div>
+
+    <!-- CHAPTER 3: TINDER POLAROID DECK -->
+    <div class="chapter" id="ch-3">
+      <h2>Our Favorite Moments</h2>
+      <p>Tap anywhere on each card to cycle through our memories together.</p>
+
+      <div class="deck-container" id="card-deck">
+        <!-- Card 11 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo11.jpeg" alt="Memory 11" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 10 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo10.jpeg" alt="Memory 10" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 9 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo9.jpeg" alt="Memory 9" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo8.jpeg" alt="Memory 8" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo7.jpeg" alt="Memory 7" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo6.jpeg" alt="Memory 6" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="polaroid-card" style="transform: rotate(-3deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo5.jpeg" alt="Memory 5" />
+          </div>
+          <div class="polaroid-caption">My favorite smile in the universe ✨</div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="polaroid-card" style="transform: rotate(4deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo4.jpeg" alt="Memory 4" />
+          </div>
+          <div class="polaroid-caption">The sweetest laughter I know 💕</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="polaroid-card" style="transform: rotate(4deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo3.jpeg" alt="Memory 3" />
+          </div>
+          <div class="polaroid-caption">The sweetest laughter I know 💕</div>
+        </div>
+        
+        <!-- Card 2 -->
+        <div class="polaroid-card" style="transform: rotate(4deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo2.jpeg" alt="Memory 2" />
+          </div>
+          <div class="polaroid-caption">The sweetest laughter I know 💕</div>
+        </div>
+        <!-- Card 1 (Top) -->
+        <div class="polaroid-card" style="transform: rotate(-1deg);">
+          <div class="polaroid-img-wrap">
+            <img src="./images/photo1.jpeg" alt="Memory 1" />
+          </div>
+          <div class="polaroid-caption">Where every good story begins 🌸</div>
+        </div>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--accent-pink);">Cards remaining: <span id="cards-count">3</span></p>
+
+      <button class="btn-primary" id="btn-after-cards" onclick="nextChapter()">
+        <span>Take The Couple Quiz</span> 🎯
+      </button>
+    </div>
+
+    <!-- CHAPTER 4: THE COUPLE QUIZ -->
+    <div class="chapter" id="ch-4">
+      <h2>Relationship Pop Quiz</h2>
+      <p>Answer truthfully, no cheating!</p>
+
+      <div id="quiz-box">
+        <div class="quiz-question" id="quiz-title">1. Who is the absolute undisputed boss in this relationship?</div>
+        <div class="quiz-options" id="quiz-opts">
+          <button class="quiz-btn" onclick="answerQuiz(0)">You (No questions asked)</button>
+          <button class="quiz-btn" onclick="answerQuiz(1)">Definitely You</button>
+          <button class="quiz-btn" onclick="answerQuiz(2)">There is zero debate: You</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAPTER 5: INTERACTIVE CAKE & CANDLE BLOW -->
+    <div class="chapter" id="ch-5">
+      <h2>Make A Birthday Wish!</h2>
+      <p>Close your eyes, think of your sweetest dream, and tap the candles to blow them out.</p>
+
+      <div class="cake-stage" onclick="blowCandles()">
+        <div class="candles-row">
+          <div class="candle"><div class="candle-flame"></div></div>
+          <div class="candle"><div class="candle-flame"></div></div>
+          <div class="candle"><div class="candle-flame"></div></div>
+        </div>
+        <div class="cake-top"></div>
+        <div class="cake-base"></div>
+      </div>
+
+      <p id="cake-hint" style="color: var(--accent-gold); font-weight: 600;">✨ Tap the flames to make your wish! ✨</p>
+      
+      <button class="btn-primary" id="btn-cake-next" style="display:none;" onclick="nextChapter()">
+        <span>Claim Your Birthday Passes</span> 🎟️
+      </button>
+    </div>
+
+    <!-- CHAPTER 6: SCRATCH-OFF COUPONS -->
+    <div class="chapter" id="ch-6">
+      <h2>Your Birthday VIP Passes</h2>
+      <p>Rub with your finger or mouse to scratch and unlock your 3 perks:</p>
+
+      <div class="scratch-wrapper">
+        <div class="scratch-reward">
+          Argument Won Pass 🏆
+          <span>Win any friendly argument without explanation.</span>
+        </div>
+        <canvas class="scratch-canvas" id="sc-1" width="260" height="120"></canvas>
+      </div>
+
+      <div class="scratch-wrapper">
+        <div class="scratch-reward">
+          Midnight Dessert Run 🍦
+          <span>Valid anytime for waffles, ice cream, or takeout.</span>
+        </div>
+        <canvas class="scratch-canvas" id="sc-2" width="260" height="120"></canvas>
+      </div>
+
+      <div class="scratch-wrapper">
+        <div class="scratch-reward">
+          Unlimited Long Hugs 🫂
+          <span>Never-expiring redeemable anytime pass.</span>
+        </div>
+        <canvas class="scratch-canvas" id="sc-3" width="260" height="120"></canvas>
+      </div>
+
+      <button class="btn-primary" onclick="nextChapter()" style="margin-top: 15px;">
+        <span>Open Final Letter</span> 💌
+      </button>
+    </div>
+
+    <!-- CHAPTER 7: WAX-SEALED LOVE LETTER -->
+    <div class="chapter" id="ch-7">
+      <h2>Happy Birthday, My Love</h2>
+      
+      <div class="letter-paper">
+        <p>Dearest,</p>
+        <p>
+          Happy Birthday, My Love ❤️🎂✨
+
+          Today is all about the most beautiful person in my life. Honestly, I don’t think words will ever be enough to express how grateful I am to have you in my life. 🥹❤️ You make my ordinary days special, my hardest moments easier, and my happiest memories even more beautiful.
+
+          One thing I love the most about us is how our bond keeps getting stronger with every passing day. The more time we spend together, the more deeply we fall in love with each other. And honestly, I never get tired of you. Whether it’s talking to you for the entire day, watching movies together, going on dates, laughing over silly things, or simply spending time with you, every little moment becomes special when I’m with you. 🫶🏻❤️
+
+          You’re not like everyone else. You’re such a calm, beautiful and pure-hearted person. I love how you understand my moods even when I don’t say anything. You somehow know when I’m happy, upset, stressed or not feeling okay. The way you take care of me, worry about me, and look after me means more than you probably realise. Sometimes, you care for me just like a mother would, and that feeling is something I can’t explain in words. 🥺❤️
+
+          Your smile is my favourite thing, your laugh is my favourite sound, and your happiness will always mean the world to me. Thank you for being patient with me, understanding me, supporting me and loving me the way you do. I feel lucky to have someone like you by my side. ❤️
+
+          I pray that this year brings you endless happiness, good health, success and everything your heart wishes for. May all your dreams come true, and may you always keep that beautiful smile on your face. 🌸✨
+
+        No matter what happens, I promise to stand by your side, celebrate your victories, support you through your difficult days and keep making beautiful memories together. I want us to keep growing, understanding each other and falling in love even more with every passing day. ❤️🧿
+
+
+        </p>
+        <div class="letter-sig">I LOVE YOU SO MUCH, MY LOVE! ❤️😘🫂</div>
+      </div>
+
+      <button class="btn-primary" onclick="grandConfetti()">
+        <span>Send Virtual Hugs & Kisses</span> 💖
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    /* -----------------------------------------------
+       1. CHAPTER NAVIGATION SYSTEM
+    ------------------------------------------------ */
+    let currentChapter = 0;
+    const totalChapters = 7;
+
+    function showChapter(idx) {
+      document.querySelectorAll('.chapter').forEach(ch => ch.classList.remove('active'));
+      const target = document.getElementById(`ch-${idx}`);
+      if (target) {
+        target.classList.add('active');
+        currentChapter = idx;
+        const progress = document.getElementById('progress-indicator');
+        if (idx === 0) {
+          progress.textContent = "Special Delivery";
+        } else {
+          progress.textContent = `Chapter ${idx} of ${totalChapters}`;
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function nextChapter() {
+      if (currentChapter < totalChapters) {
+        showChapter(currentChapter + 1);
+        if (currentChapter === 6) initScratchCards();
+      }
+    }
+
+    function openEnvelope() {
+      initAudio();
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+      setTimeout(() => showChapter(1), 400);
+    }
+
+    /* -----------------------------------------------
+       2. WEB AUDIO SYNTHESIZER (ROMANTIC ARPEGGIOS)
+    ------------------------------------------------ */
+    let audioCtx = null;
+    let isPlaying = false;
+    let musicInterval = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      if (!isPlaying) {
+        startChimes();
+      }
+    }
+
+    function playNote(freq, start, duration) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.exponentialRampToValueAtTime(0.08, start + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(start);
+      osc.stop(start + duration);
+    }
+
+    function startChimes() {
+      isPlaying = true;
+      document.getElementById('music-toggle').classList.add('spinning');
+      const scale = [261.63, 329.63, 392.00, 523.25, 659.25, 587.33, 392.00, 329.63];
+      let step = 0;
+
+      musicInterval = setInterval(() => {
+        if (!isPlaying || !audioCtx) return;
+        const now = audioCtx.currentTime;
+        playNote(scale[step % scale.length], now, 1.8);
+        if (step % 2 === 0) {
+          playNote(scale[(step + 2) % scale.length] * 0.5, now + 0.1, 2.2);
+        }
+        step++;
+      }, 550);
+    }
+
+    function toggleMusic() {
+      if (!audioCtx) {
+        initAudio();
+        return;
+      }
+      if (isPlaying) {
+        isPlaying = false;
+        clearInterval(musicInterval);
+        document.getElementById('music-toggle').classList.remove('spinning');
+      } else {
+        startChimes();
+      }
+    }
+    document.getElementById('music-toggle').addEventListener('click', toggleMusic);
+
+    /* -----------------------------------------------
+       3. CHAPTER 1: RUNAWAY "NO" BUTTON
+    ------------------------------------------------ */
+    const runawayBtn = document.getElementById('btn-no');
+    const arena = document.getElementById('arena');
+    let dodgeCount = 0;
+
+    function dodgeButton() {
+      dodgeCount++;
+      const arenaRect = arena.getBoundingClientRect();
+      const maxX = (arenaRect.width / 2) - 40;
+      const maxY = 50;
+
+      const randomX = (Math.random() - 0.5) * maxX * 1.6;
+      const randomY = (Math.random() - 0.5) * maxY * 1.6;
+
+      runawayBtn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+
+      const playfulWords = ["Are you sure?", "Try again 😜", "Wrong answer!", "Nope! 💕", "Impossible!"];
+      runawayBtn.textContent = playfulWords[dodgeCount % playfulWords.length];
+    }
+
+    function passVerification() {
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+      setTimeout(() => {
+        showChapter(2);
+        startLifetimeTicker();
+      }, 450);
+    }
+
+    /* -----------------------------------------------
+       4. CHAPTER 2: REAL-TIME LIFETIME TICKER
+    ------------------------------------------------ */
+    let tickerInterval = null;
+
+    function updateLifetimeCounter() {
+      const birthVal = document.getElementById('birthdate-input').value;
+      const birth = new Date(birthVal).getTime();
+      const now = new Date().getTime();
+      const diffMs = Math.max(0, now - birth);
+
+      const seconds = Math.floor(diffMs / 1000);
+      const hours = Math.floor(seconds / 3600);
+      const days = Math.floor(hours / 24);
+      const years = (days / 365.25).toFixed(1);
+
+      document.getElementById('t-years').textContent = years;
+      document.getElementById('t-days').textContent = days.toLocaleString();
+      document.getElementById('t-hours').textContent = hours.toLocaleString();
+      document.getElementById('t-seconds').textContent = seconds.toLocaleString();
+    }
+
+    function startLifetimeTicker() {
+      updateLifetimeCounter();
+      if (!tickerInterval) {
+        tickerInterval = setInterval(updateLifetimeCounter, 1000);
+      }
+    }
+
+    /* -----------------------------------------------
+       5. CHAPTER 3: TINDER POLAROID SWIPE / TAP
+    ------------------------------------------------ */
+    const deck = document.getElementById('card-deck');
+    const cardsCounter = document.getElementById('cards-count');
+
+    deck.addEventListener('click', () => {
+      const cards = deck.querySelectorAll('.polaroid-card');
+      if (cards.length > 0) {
+        const topCard = cards[cards.length - 1];
+        topCard.style.transform = 'translateY(-140px) rotate(25deg) scale(0.85)';
+        topCard.style.opacity = '0';
+        
+        setTimeout(() => {
+          topCard.remove();
+          const remaining = deck.querySelectorAll('.polaroid-card').length;
+          cardsCounter.textContent = remaining;
+          if (remaining === 0) {
+            cardsCounter.textContent = "All memories viewed! ❤️";
+          }
+        }, 320);
+      }
+    });
+
+    /* -----------------------------------------------
+       6. CHAPTER 4: COUPLE QUIZ ENGINE
+    ------------------------------------------------ */
+    const quizQuestions = [
+      {
+        q: "1. Who is the absolute undisputed boss in this relationship?",
+        opts: ["You (No questions asked)", "Definitely You", "There is zero debate: You"]
+      },
+      {
+        q: "2. When you say 'I'm fine', what does it actually translate to?",
+        opts: ["You are definitely not fine", "Bring snacks immediately", "Hug me right now"]
+      },
+      {
+        q: "3. What was the exact moment I fell in love with you?",
+        opts: ["The very first time you smiled", "Every single second we talk", "All of the above ❤️"]
+      }
+    ];
+    let qIdx = 0;
+
+    function answerQuiz(optionIndex) {
+      confetti({ particleCount: 30, spread: 45, origin: { y: 0.6 } });
+      qIdx++;
+      if (qIdx < quizQuestions.length) {
+        document.getElementById('quiz-title').textContent = quizQuestions[qIdx].q;
+        const optsContainer = document.getElementById('quiz-opts');
+        optsContainer.innerHTML = '';
+        quizQuestions[qIdx].opts.forEach((txt, i) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-btn';
+          btn.textContent = txt;
+          btn.onclick = () => answerQuiz(i);
+          optsContainer.appendChild(btn);
+        });
+      } else {
+        document.getElementById('quiz-box').innerHTML = `
+          <div style="font-size: 1.25rem; font-weight:700; color:var(--accent-pink); margin-bottom:12px;">Score: 100% Perfection 🏆</div>
+          <p>Scientific results confirm you are the cutest girlfriend in human history.</p>
+          <button class="btn-primary" onclick="nextChapter()"><span>Proceed to the Birthday Cake</span> 🎂</button>
+        `;
+      }
+    }
+
+    /* -----------------------------------------------
+       7. CHAPTER 5: BLOW CANDLES & MAKE A WISH
+    ------------------------------------------------ */
+    let candlesBlown = false;
+
+    function blowCandles() {
+      if (candlesBlown) return;
+      candlesBlown = true;
+
+      document.querySelectorAll('.candle').forEach(c => c.classList.add('blown'));
+      document.getElementById('cake-hint').innerHTML = "✨ Wish Granted! You're the brightest light ✨";
+      document.getElementById('btn-cake-next').style.display = 'inline-flex';
+
+      confetti({
+        particleCount: 100,
+        spread: 90,
+        origin: { y: 0.55 },
+        colors: ['#f43f5e', '#ec4899', '#fcd34d', '#ffffff']
+      });
+    }
+
+    /* -----------------------------------------------
+       8. CHAPTER 6: SCRATCH-OFF VIP COUPONS
+    ------------------------------------------------ */
+    function initScratchCards() {
+      ['sc-1', 'sc-2', 'sc-3'].forEach(id => {
+        const canvas = document.getElementById(id);
+        if (!canvas || canvas.dataset.ready) return;
+        canvas.dataset.ready = "true";
+
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Pattern text on scratch surface
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('✨ Scratch With Love ✨', canvas.width / 2, canvas.height / 2 + 5);
+
+        let isScratching = false;
+
+        function scratch(e) {
+          if (!isScratching) return;
+          const rect = canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          const x = clientX - rect.left;
+          const y = clientY - rect.top;
+
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath();
+          ctx.arc(x, y, 18, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        canvas.addEventListener('mousedown', () => isScratching = true);
+        canvas.addEventListener('mouseup', () => isScratching = false);
+        canvas.addEventListener('mousemove', scratch);
+
+        canvas.addEventListener('touchstart', (e) => { isScratching = true; scratch(e); });
+        canvas.addEventListener('touchend', () => isScratching = false);
+        canvas.addEventListener('touchmove', scratch);
+      });
+    }
+
+    /* -----------------------------------------------
+       9. CHAPTER 7: CELEBRATION CLIMAX
+    ------------------------------------------------ */
+    function grandConfetti() {
+      const duration = 3.5 * 1000;
+      const end = Date.now() + duration;
+
+      (function frame() {
+        confetti({
+          particleCount: 5,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 }
+        });
+        confetti({
+          particleCount: 5,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 }
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(frame);
+        }
+      }());
+    }
+
+    /* -----------------------------------------------
+       10. FLOATING BACKGROUND HEARTS ENGINE
+    ------------------------------------------------ */
+    const heartCanvas = document.getElementById('hearts-canvas');
+    const hCtx = heartCanvas.getContext('2d');
+    let hearts = [];
+
+    function resizeCanvas() {
+      heartCanvas.width = window.innerWidth;
+      heartCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class FloatingHeart {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * heartCanvas.width;
+        this.y = heartCanvas.height + 20;
+        this.size = Math.random() * 12 + 8;
+        this.speedY = Math.random() * 0.9 + 0.4;
+        this.speedX = (Math.random() - 0.5) * 0.6;
+        this.opacity = Math.random() * 0.5 + 0.2;
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        if (this.y < -30) this.reset();
+      }
+      draw() {
+        hCtx.save();
+        hCtx.globalAlpha = this.opacity;
+        hCtx.fillStyle = '#f472b6';
+        hCtx.beginPath();
+        const topCurveHeight = this.size * 0.3;
+        hCtx.moveTo(this.x, this.y + topCurveHeight);
+        hCtx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
+        hCtx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size, this.x, this.y + this.size);
+        hCtx.bezierCurveTo(this.x, this.y + this.size, this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight);
+        hCtx.bezierCurveTo(this.x + this.size / 2, this.y, this.x, this.y, this.x, this.y + topCurveHeight);
+        hCtx.closePath();
+        hCtx.fill();
+        hCtx.restore();
+      }
+    }
+
+    for (let i = 0; i < 22; i++) {
+      hearts.push(new FloatingHeart());
+    }
+
+    function animateHearts() {
+      hCtx.clearRect(0, 0, heartCanvas.width, heartCanvas.height);
+      hearts.forEach(h => {
+        h.update();
+        h.draw();
+      });
+      requestAnimationFrame(animateHearts);
+    }
+    animateHearts();
+  </script>
+</body>
+</html>
